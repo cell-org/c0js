@@ -1,0 +1,14 @@
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.0/web3.min.js"></script>
+<script src="/f1.js"></script>
+<script>
+const f1 = new F1()
+document.addEventListener("DOMContentLoaded", async () => {
+  await f1.init({ web3: new Web3(window.ethereum), })
+})
+</script>
+</head>
+<body>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "name": "c0js",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha --timeout 100000",
+    "build": "webpack && cp dist/c0.js demo/c0.js"
+  },
+  "author": "skogard",
+  "license": "MIT",
+  "dependencies": {
+    "@metamask/eth-sig-util": "^4.0.0",
+    "cross-fetch": "^3.1.5",
+    "ipfsh": "^0.0.6",
+    "json-stringify-deterministic": "^1.0.5",
+    "merkletreejs": "^0.2.31"
+  },
+  "devDependencies": {
+    "@alch/alchemy-web3": "^1.1.9",
+    "assert": "^2.0.0",
+    "axios": "^0.25.0",
+    "buffer": "^6.0.3",
+    "chai": "^4.3.4",
+    "crypto-browserify": "^3.12.0",
+    "dotenv": "^14.2.0",
+    "https-browserify": "^1.0.0",
+    "ipfsio": "^0.0.8",
+    "mocha": "^9.1.4",
+    "nebulus": "^0.0.11",
+    "os-browserify": "^0.3.0",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "url": "^0.11.0",
+    "web3": "^1.7.0",
+    "webpack-cli": "^4.9.2"
+  }
+}
