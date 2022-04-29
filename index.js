@@ -1,15 +1,18 @@
-const fetch = require('cross-fetch');
 const { create } = require("multiformats/hashes/digest")
 const { CID } = require('multiformats/cid')
 const { base32 } = require("multiformats/bases/base32")
 const Collection = require('./collection')
 const Token = require('./token')
+const Gift = require('./gift')
 const Util = require('./util')
+const Lock = require('./lock')
 class C0 {
   constructor() {
     this.collection = new Collection()
     this.token = new Token()
     this.util = new Util()
+    this.gift = new Gift()
+    this.lock = new Lock()
   }
   async init(o) {
     this.web3 = o.web3
@@ -40,6 +43,8 @@ class C0 {
     this.collection.init(o)
     this.token.init(o)
     this.util.init(o)
+    this.gift.init(o)
+    this.lock.init(o)
   }
 }
 module.exports = C0

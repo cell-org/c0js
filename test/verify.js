@@ -26,35 +26,44 @@ describe("c0.util.verify()", () => {
   it('verify a valid gift', async () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
-    let gift = await c0.token.gift({
-      cid: meta_cid,
-      receiver: c0.account
+    let gift = await c0.gift.create({
+      body: {
+        cid: meta_cid,
+        receiver: c0.account
+      },
+      domain: {}
     })
-    let isvalid = c0.util.verify(gift)
+    let isvalid = c0.util.verify(gift.body)
     expect(isvalid).to.be.true
   })
   it('verify an invalid gift: wrong "raw" attribute', async () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
-    let gift = await c0.token.gift({
-      cid: meta_cid,
-      receiver: c0.account
+    let gift = await c0.gift.create({
+      body: {
+        cid: meta_cid,
+        receiver: c0.account
+      },
+      domain: {}
     })
     // modify gift's "raw" attribute
-    gift.raw = false
-    let isvalid = c0.util.verify(gift)
+    gift.body.raw = false
+    let isvalid = c0.util.verify(gift.body)
     expect(isvalid).to.be.false
   })
   it('verify an invalid gift: wrong "cid" attribute', async () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
-    let gift = await c0.token.gift({
-      cid: meta_cid,
-      receiver: c0.account
+    let gift = await c0.gift.create({
+      body: {
+        cid: meta_cid,
+        receiver: c0.account
+      },
+      domain: {}
     })
     // modify gift's "raw" attribute
-    gift.cid = "bafkreiecoogmguhvhvslpait4kknvmic5344dgvrs3l5migok5aj33pcei"
-    let isvalid = c0.util.verify(gift)
+    gift.body.cid = "bafkreiecoogmguhvhvslpait4kknvmic5344dgvrs3l5migok5aj33pcei"
+    let isvalid = c0.util.verify(gift.body)
     expect(isvalid).to.be.false
   })
   it('verify a valid unsigned token', async () => {

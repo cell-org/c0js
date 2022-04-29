@@ -84,13 +84,13 @@ describe("c0.token.build()", () => {
     expect(token.body.cid).to.exist
     expect(token.body.id).to.exist
     expect(token.body.raw).to.exist
-    expect(token.body.minter).to.exist
-    expect(token.body.price).to.exist
+    expect(token.body.sender).to.exist
+    expect(token.body.value).to.exist
     expect(token.body.start).to.exist
     expect(token.body.end).to.exist
     expect(token.body.royaltyReceiver).to.exist
     expect(token.body.royaltyAmount).to.exist
-    expect(token.body.minters).to.exist
+    expect(token.body.senders).to.exist
     expect(token.body.merkleHash).to.exist
     expect(token.body.puzzleHash).to.exist
 
@@ -118,13 +118,13 @@ describe("c0.token.build()", () => {
     })
 
     expect(token.body.cid).to.equal(meta_cid)
-    expect(token.body.minter).to.equal("0x0000000000000000000000000000000000000000")
-    expect(token.body.price).to.equal("0")
+    expect(token.body.sender).to.equal("0x0000000000000000000000000000000000000000")
+    expect(token.body.value).to.equal("0")
     expect(token.body.start).to.equal("0")
     expect(token.body.end).to.equal("18446744073709551615")
     expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
     expect(token.body.royaltyAmount).to.equal("0")
-    expect(token.body.minters.length).to.equal(0)
+    expect(token.body.senders.length).to.equal(0)
     expect(token.body.merkleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
     expect(token.body.puzzleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
 

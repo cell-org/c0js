@@ -13,7 +13,7 @@ const CHAINID = 4
 const nebulus = new Nebulus();
 var Token
 var Collection
-describe("c0.token.gift()", () => {
+describe("c0.gift", () => {
   beforeEach(async () => {
     c0 = new C0()
     await c0.init({ web3, key: process.env.RINKEBY_PRIVATE_KEY })
@@ -22,15 +22,21 @@ describe("c0.token.gift()", () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
     try {
-      let gift = await c0.token.gift({
-        cid: meta_cid
+      let gift = await c0.gift.create({
+        body: {
+          cid: meta_cid
+        },
+        domain: {}
       })
     } catch (e) {
       expect(e.message).to.equal("required field: receiver")
     }
 
     try {
-      let gift = await c0.token.gift({ })
+      let gift = await c0.gift.create({
+        body: {},
+        domain: {}
+      })
     } catch (e) {
       expect(e.message).to.equal("required field: cid")
     }
@@ -38,20 +44,24 @@ describe("c0.token.gift()", () => {
   it('gift() default attributes', async () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
-    let gift = await c0.token.gift({
-      cid: meta_cid,
-      receiver: c0.account
+    let gift = await c0.gift.create({
+      body: {
+        cid: meta_cid,
+        receiver: c0.account
+      },
+      domain: { }
     })
-    expect(gift.cid).to.exist
-    expect(gift.id).to.exist
-    expect(gift.raw).to.exist
-    expect(gift.receiver).to.exist
-    expect(gift.royaltyReceiver).to.exist
-    expect(gift.royaltyAmount).to.exist
+    console.log("gift", gift)
+    expect(gift.body.cid).to.exist
+    expect(gift.body.id).to.exist
+    expect(gift.body.raw).to.exist
+    expect(gift.body.receiver).to.exist
+    expect(gift.body.royaltyReceiver).to.exist
+    expect(gift.body.royaltyAmount).to.exist
 
-    expect(gift.cid).to.equal(meta_cid)
-    expect(gift.receiver).to.equal(c0.account)
-    expect(gift.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
-    expect(gift.royaltyAmount).to.equal("0")
+    expect(gift.body.cid).to.equal(meta_cid)
+    expect(gift.body.receiver).to.equal(c0.account)
+    expect(gift.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
+    expect(gift.body.royaltyAmount).to.equal("0")
   })
 })

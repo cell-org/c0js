@@ -16,13 +16,13 @@ var Collection
 var svg_cid;
 const testDefaults = (token, exclude) => {
   // check only if NOT included in "exclude", 
-  if (!exclude.includes("minter")) expect(token.body.minter).to.equal("0x0000000000000000000000000000000000000000")
-  if (!exclude.includes("price")) expect(token.body.price).to.equal("0")
+  if (!exclude.includes("sender")) expect(token.body.sender).to.equal("0x0000000000000000000000000000000000000000")
+  if (!exclude.includes("value")) expect(token.body.value).to.equal("0")
   if (!exclude.includes("start")) expect(token.body.start).to.equal("0")
   if (!exclude.includes("end")) expect(token.body.end).to.equal("18446744073709551615")
   if (!exclude.includes("royaltyReceiver")) expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
   if (!exclude.includes("royaltyAmount")) expect(token.body.royaltyAmount).to.equal("0")
-  if (!exclude.includes("minters")) expect(token.body.minters.length).to.equal(0)
+  if (!exclude.includes("senders")) expect(token.body.senders.length).to.equal(0)
   if (!exclude.includes("merkleHash")) expect(token.body.merkleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
   if (!exclude.includes("puzzleHash")) expect(token.body.puzzleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
 }
@@ -97,13 +97,13 @@ describe("c0.token.build()", () => {
     expect(token.body.cid).to.exist
     expect(token.body.id).to.exist
     expect(token.body.raw).to.exist
-    expect(token.body.minter).to.exist
-    expect(token.body.price).to.exist
+    expect(token.body.sender).to.exist
+    expect(token.body.value).to.exist
     expect(token.body.start).to.exist
     expect(token.body.end).to.exist
     expect(token.body.royaltyReceiver).to.exist
     expect(token.body.royaltyAmount).to.exist
-    expect(token.body.minters).to.exist
+    expect(token.body.senders).to.exist
     expect(token.body.merkleHash).to.exist
     expect(token.body.puzzleHash).to.exist
 
@@ -136,7 +136,7 @@ describe("c0.token.build()", () => {
 
 
   })
-  it('minter', async () => {
+  it('sender', async () => {
     let meta_cid = await c0.util.cid({
       name: "svg",
       description: "svg example",
@@ -151,15 +151,15 @@ describe("c0.token.build()", () => {
       domain: domain,
       body: {
         cid: meta_cid,
-        minter: c0.account
+        sender: c0.account
       }
     })
     console.log("token", token)
     expect(token.body.cid).to.equal(meta_cid)
-    expect(token.body.minter).to.equal(c0.account)
-    testDefaults(token, ["minter"])
+    expect(token.body.sender).to.equal(c0.account)
+    testDefaults(token, ["sender"])
   })
-  it('price', async () => {
+  it('value', async () => {
     let meta_cid = await c0.util.cid({
       name: "svg",
       description: "svg example",
@@ -174,12 +174,12 @@ describe("c0.token.build()", () => {
       domain: domain,
       body: {
         cid: meta_cid,
-        price: 10**18
+        value: 10**18
       }
     })
     expect(token.body.cid).to.equal(meta_cid)
-    expect(token.body.price).to.equal("" + 10**18)
-    testDefaults(token, ["price"])
+    expect(token.body.value).to.equal("" + 10**18)
+    testDefaults(token, ["value"])
   })
   it('start', async () => {
     let meta_cid = await c0.util.cid({
@@ -297,7 +297,7 @@ describe("c0.token.build()", () => {
     expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
     testDefaults(token, ["royaltyAmount"])
   })
-  it('minters', async () => {
+  it('senders', async () => {
     let meta_cid = await c0.util.cid({
       name: "svg",
       description: "svg example",
@@ -312,20 +312,20 @@ describe("c0.token.build()", () => {
       domain: domain,
       body: {
         cid: meta_cid,
-        minters: [
+        senders: [
           "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
           c0.account
         ]
       }
     })
     console.log("token", token)
-    expect(token.body.minters.length).to.equal(2)
+    expect(token.body.senders.length).to.equal(2)
     expect(token.body.merkleHash).to.not.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
-    expect(token.body.minters).to.deep.equal([
+    expect(token.body.senders).to.deep.equal([
       "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
       c0.account
     ])
-    testDefaults(token, ["minters", "merkleHash"])
+    testDefaults(token, ["senders", "merkleHash"])
   })
   it('puzzle', async () => {
     let meta_cid = await c0.util.cid({
