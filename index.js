@@ -5,14 +5,12 @@ const Collection = require('./collection')
 const Token = require('./token')
 const Gift = require('./gift')
 const Util = require('./util')
-const Lock = require('./lock')
 class C0 {
   constructor() {
     this.collection = new Collection()
     this.token = new Token()
     this.util = new Util()
     this.gift = new Gift()
-    this.lock = new Lock()
   }
   async init(o) {
     this.web3 = o.web3
@@ -44,7 +42,6 @@ class C0 {
     this.token.init(o)
     this.util.init(o)
     this.gift.init(o)
-    this.lock.init(o)
   }
 }
 module.exports = C0
