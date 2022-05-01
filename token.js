@@ -100,7 +100,7 @@ class Token extends Contract {
       body: {
         cid: body.cid,
         id: id,
-        raw: (codec === 85),  // 0x55 is raw, 0x70 is dag-pb
+        encoding: (codec === 85 ? 0 : 1),  // 0x55 is raw (0), 0x70 is dag-pb (1)
         sender: (body.sender ? body.sender : "0x0000000000000000000000000000000000000000"),
         receiver: (body.receiver ? body.receiver : "0x0000000000000000000000000000000000000000"),
         value: "" + (body.value ? body.value : 0),
@@ -110,6 +110,7 @@ class Token extends Contract {
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
       }
     }
+    console.log("R", r)
 
     // advanced auth
     if (o.body.senders) {
@@ -214,7 +215,7 @@ class Token extends Contract {
         ],
         Body: [
           { name: "id", type: "uint256" },
-          { name: "raw", type: "bool" },
+          { name: "encoding", type: "uint8" },
           { name: "sender", type: "address" },
           { name: "receiver", type: "address" },
           { name: "value", type: "uint128" },

@@ -13,7 +13,7 @@ const CHAINID = 4
 const nebulus = new Nebulus();
 var Token
 var Collection
-describe("c0.token.build()", () => {
+describe("c0.token.create()", () => {
   beforeEach(async () => {
     c0 = new C0()
     await c0.init({ web3, key: process.env.RINKEBY_PRIVATE_KEY })
@@ -83,7 +83,7 @@ describe("c0.token.build()", () => {
     // Check the body attributes
     expect(token.body.cid).to.exist
     expect(token.body.id).to.exist
-    expect(token.body.raw).to.exist
+    expect(token.body.encoding).to.exist
     expect(token.body.sender).to.exist
     expect(token.body.value).to.exist
     expect(token.body.start).to.exist

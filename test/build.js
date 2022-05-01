@@ -96,7 +96,7 @@ describe("c0.token.build()", () => {
     // Check the body attributes
     expect(token.body.cid).to.exist
     expect(token.body.id).to.exist
-    expect(token.body.raw).to.exist
+    expect(token.body.encoding).to.exist
     expect(token.body.sender).to.exist
     expect(token.body.value).to.exist
     expect(token.body.start).to.exist

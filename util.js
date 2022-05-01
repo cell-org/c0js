@@ -50,9 +50,11 @@ class Util {
         return false
       }
     }
-    if (!body.raw) {
+    console.log(body.encoding)
+    console.log(typeof body.encoding)
+    if (typeof body.encoding === "undefined") {
       if (verbose) {
-        throw new Error("body.raw required")
+        throw new Error("body.encoding required")
       } else {
         return false
       }
@@ -65,7 +67,7 @@ class Util {
       }
     }
 
-    const code = (body.raw ? 85 : 112);
+    const code = (body.encoding === 0 ? 85 : 112);
     const multiHashCode = 18  // sha256
     const hexId = this.web3.utils.toHex(body.id)
     const padded = hexId.slice(2).padStart(64, '0')
@@ -75,7 +77,7 @@ class Util {
 
     if (actualCid !== body.cid) {
       if (verbose) {
-        throw new Error("the cid attribute and the id + raw attributes don't match")
+        throw new Error("the cid attribute and the id + encoding attributes don't match")
       } else {
         return false
       }
