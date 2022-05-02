@@ -88,7 +88,6 @@ class Token extends Contract {
     const bytes = base32.decode(body.cid)
     const inspected = CID.inspectBytes(base32.decode(body.cid)) // inspected.codec: 112 (0x70)
     const codec = inspected.codec
-    //const id = "0x" + digest.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
     const id = new this.web3.utils.BN(digest).toString();
     let r = {
       domain: {
@@ -110,7 +109,6 @@ class Token extends Contract {
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
       }
     }
-    console.log("R", r)
 
     // advanced auth
     if (o.body.senders) {
