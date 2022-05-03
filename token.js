@@ -74,6 +74,7 @@ class Token extends Contract {
   //    end,
   //    royaltyReceiver,
   //    royaltyAmount,
+  //    burned,
   //    senders,
   //    puzzle
   //  }
@@ -107,6 +108,7 @@ class Token extends Contract {
         end: "" + (body.end ? body.end : new this.web3.utils.BN(2).pow(new this.web3.utils.BN(64)).sub(new this.web3.utils.BN(1)).toString()),
         royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
+        burned: (body.burned ? body.burned : [])
       }
     }
 
@@ -221,6 +223,7 @@ class Token extends Contract {
           { name: "end", type: "uint64" },
           { name: "royaltyReceiver", type: "address" },
           { name: "royaltyAmount", type: "uint96" },
+          { name: "burned", type: "uint256[]" },
           { name: "merkleHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },
         ],
