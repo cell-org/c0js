@@ -33,7 +33,6 @@ describe("c0.util.verify()", () => {
       },
       domain: {}
     })
-    console.log("gift.body", gift.body)
     let isvalid = c0.util.verify(gift.body)
     expect(isvalid).to.be.true
   })

@@ -51,7 +51,6 @@ describe("c0.gift", () => {
       },
       domain: { }
     })
-    console.log("gift", gift)
     expect(gift.body.cid).to.exist
     expect(gift.body.id).to.exist
     expect(gift.body.encoding).to.exist

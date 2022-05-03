@@ -50,8 +50,6 @@ class Util {
         return false
       }
     }
-    console.log(body.encoding)
-    console.log(typeof body.encoding)
     if (typeof body.encoding === "undefined") {
       if (verbose) {
         throw new Error("body.encoding required")

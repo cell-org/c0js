@@ -75,6 +75,7 @@ class Token extends Contract {
   //    royaltyReceiver,
   //    royaltyAmount,
   //    burned,
+  //    owns,
   //    senders,
   //    puzzle
   //  }
@@ -90,6 +91,21 @@ class Token extends Contract {
     const inspected = CID.inspectBytes(base32.decode(body.cid)) // inspected.codec: 112 (0x70)
     const codec = inspected.codec
     const id = new this.web3.utils.BN(digest).toString();
+
+    let burned = (body.burned ? body.burned : [])
+    burned = burned.map((b) => {
+      return {
+        collection: (b.collection ? b.collection : "0x0000000000000000000000000000000000000000"),
+        id: b.id
+      }
+    })
+    let owns = (body.owns ? body.owns : [])
+    owns = owns.map((o) => {
+      return {
+        collection: (o.collection ? o.collection : "0x0000000000000000000000000000000000000000"),
+        id: o.id
+      }
+    })
     let r = {
       domain: {
         name: domain.name,
@@ -108,7 +124,8 @@ class Token extends Contract {
         end: "" + (body.end ? body.end : new this.web3.utils.BN(2).pow(new this.web3.utils.BN(64)).sub(new this.web3.utils.BN(1)).toString()),
         royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
-        burned: (body.burned ? body.burned : [])
+        burned,
+        owns
       }
     }
 
@@ -213,6 +230,10 @@ class Token extends Contract {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
+        Token: [
+          { name: "collection", type: "address" },
+          { name: "id", type: "uint256" }
+        ],
         Body: [
           { name: "id", type: "uint256" },
           { name: "encoding", type: "uint8" },
@@ -223,7 +244,9 @@ class Token extends Contract {
           { name: "end", type: "uint64" },
           { name: "royaltyReceiver", type: "address" },
           { name: "royaltyAmount", type: "uint96" },
-          { name: "burned", type: "uint256[]" },
+          //{ name: "burned", type: "uint256[]" },
+          { name: "burned", type: "Token[]" },
+          { name: "owns", type: "Token[]" },
           { name: "merkleHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },
         ],

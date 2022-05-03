@@ -17,11 +17,15 @@ var svg_cid;
 const testDefaults = (token, exclude) => {
   // check only if NOT included in "exclude", 
   if (!exclude.includes("sender")) expect(token.body.sender).to.equal("0x0000000000000000000000000000000000000000")
+  if (!exclude.includes("receiver")) expect(token.body.receiver).to.equal("0x0000000000000000000000000000000000000000")
   if (!exclude.includes("value")) expect(token.body.value).to.equal("0")
   if (!exclude.includes("start")) expect(token.body.start).to.equal("0")
   if (!exclude.includes("end")) expect(token.body.end).to.equal("18446744073709551615")
   if (!exclude.includes("royaltyReceiver")) expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
   if (!exclude.includes("royaltyAmount")) expect(token.body.royaltyAmount).to.equal("0")
+  if (!exclude.includes("burned")) expect(token.body.burned.length).to.equal(0)
+  if (!exclude.includes("owns")) expect(token.body.owns.length).to.equal(0)
+
   if (!exclude.includes("senders")) expect(token.body.senders.length).to.equal(0)
   if (!exclude.includes("merkleHash")) expect(token.body.merkleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
   if (!exclude.includes("puzzleHash")) expect(token.body.puzzleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
@@ -98,11 +102,14 @@ describe("c0.token.build()", () => {
     expect(token.body.id).to.exist
     expect(token.body.encoding).to.exist
     expect(token.body.sender).to.exist
+    expect(token.body.receiver).to.exist
     expect(token.body.value).to.exist
     expect(token.body.start).to.exist
     expect(token.body.end).to.exist
     expect(token.body.royaltyReceiver).to.exist
     expect(token.body.royaltyAmount).to.exist
+    expect(token.body.burned).to.exist
+    expect(token.body.owns).to.exist
     expect(token.body.senders).to.exist
     expect(token.body.merkleHash).to.exist
     expect(token.body.puzzleHash).to.exist
@@ -129,12 +136,7 @@ describe("c0.token.build()", () => {
         cid: meta_cid
       }
     })
-    console.log("token", token)
-
-
     testDefaults(token, [])
-
-
   })
   it('sender', async () => {
     let meta_cid = await c0.util.cid({
@@ -154,7 +156,6 @@ describe("c0.token.build()", () => {
         sender: c0.account
       }
     })
-    console.log("token", token)
     expect(token.body.cid).to.equal(meta_cid)
     expect(token.body.sender).to.equal(c0.account)
     testDefaults(token, ["sender"])
@@ -246,7 +247,6 @@ describe("c0.token.build()", () => {
         royaltyReceiver: c0.account
       }
     })
-    console.log("token", token)
     expect(token.body.royaltyAmount).to.equal("100000")
     expect(token.body.royaltyReceiver).to.equal(c0.account)
     testDefaults(token, ["end", "royaltyAmount", "royaltyReceiver"])
@@ -269,7 +269,6 @@ describe("c0.token.build()", () => {
         royaltyReceiver: c0.account
       }
     })
-    console.log("token", token)
     expect(token.body.royaltyAmount).to.equal("0")
     expect(token.body.royaltyReceiver).to.equal(c0.account)
     testDefaults(token, ["royaltyReceiver"])
@@ -292,7 +291,6 @@ describe("c0.token.build()", () => {
         royaltyAmount: 100000, // 10%
       }
     })
-    console.log("token", token)
     expect(token.body.royaltyAmount).to.equal("100000")
     expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
     testDefaults(token, ["royaltyAmount"])
@@ -318,7 +316,6 @@ describe("c0.token.build()", () => {
         ]
       }
     })
-    console.log("token", token)
     expect(token.body.senders.length).to.equal(2)
     expect(token.body.merkleHash).to.not.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
     expect(token.body.senders).to.deep.equal([
@@ -345,7 +342,6 @@ describe("c0.token.build()", () => {
         puzzle: "this is the solution"
       }
     })
-    console.log("token", token)
     testDefaults(token, ["puzzleHash"])
   })
 })

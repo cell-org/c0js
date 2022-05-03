@@ -14,7 +14,6 @@ class Gift extends Contract {
     return super.contract(address) 
   }
   async create(o) {
-    console.log("O", o)
     if (!o) throw new Error("body & domain missing")
     if (!o.body) throw new Error("body missing")
     if (!o.domain) throw new Error("domain missing")
