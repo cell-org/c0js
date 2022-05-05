@@ -93,6 +93,7 @@ describe("c0.token.create()", () => {
     expect(token.body.royaltyAmount).to.exist
     expect(token.body.burned).to.exist
     expect(token.body.owns).to.exist
+    expect(token.body.balance).to.exist
     expect(token.body.senders).to.exist
     expect(token.body.merkleHash).to.exist
     expect(token.body.puzzleHash).to.exist
@@ -130,6 +131,7 @@ describe("c0.token.create()", () => {
     expect(token.body.royaltyAmount).to.equal("0")
     expect(token.body.burned.length).to.equal(0)
     expect(token.body.owns.length).to.equal(0)
+    expect(token.body.balance.length).to.equal(0)
     expect(token.body.senders.length).to.equal(0)
     expect(token.body.merkleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
     expect(token.body.puzzleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")

@@ -76,6 +76,7 @@ class Token extends Contract {
   //    royaltyAmount,
   //    burned,
   //    owns,
+  //    balance,
   //    senders,
   //    puzzle
   //  }
@@ -95,15 +96,22 @@ class Token extends Contract {
     let burned = (body.burned ? body.burned : [])
     burned = burned.map((b) => {
       return {
-        collection: (b.collection ? b.collection : "0x0000000000000000000000000000000000000000"),
+        addr: (b.addr ? b.addr : "0x0000000000000000000000000000000000000000"),
         id: b.id
       }
     })
     let owns = (body.owns ? body.owns : [])
     owns = owns.map((o) => {
       return {
-        collection: (o.collection ? o.collection : "0x0000000000000000000000000000000000000000"),
+        addr: (o.addr ? o.addr : "0x0000000000000000000000000000000000000000"),
         id: o.id
+      }
+    })
+    let balance = (body.balance ? body.balance : [])
+    balance = balance.map((b) => {
+      return {
+        addr: (b.addr ? b.addr : "0x0000000000000000000000000000000000000000"),
+        id: b.id
       }
     })
     let r = {
@@ -125,7 +133,8 @@ class Token extends Contract {
         royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
         burned,
-        owns
+        owns,
+        balance
       }
     }
 
@@ -147,6 +156,12 @@ class Token extends Contract {
       r.body.puzzleHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
     }
     return r
+  }
+  async burn(address, ids) {
+    let tx = await this.methods(address).burn(ids).send({
+      from: this.account
+    })
+    return tx
   }
   async send(signedTokens, auths, options) {
     let signedBodies = []
@@ -204,20 +219,6 @@ class Token extends Contract {
     let tx = await this.methods(domain.verifyingContract).token(signedBodies, proofs).send(o)
     return tx
   }
-//  cid(tokenBody) {
-//    if (!tokenBody) throw new Error("must pass a token object with 'id' and 'raw' attributes")
-//    if (!tokenBody.id) throw new Error('id missing');
-//    const code = (tokenBody.raw ? 85 : 112);
-//    const multiHashCode = 18  // sha256
-//    const hexId = this.web3.utils.toHex(tokenBody.id)
-//    const padded = hexId.slice(2).padStart(64, '0')
-//    const d = Uint8Array.from(Buffer.from(padded, 'hex'));
-//    const digest = create(multiHashCode, d)
-//    return CID.create(1, code, digest).toString()
-//  }
-//  tokenURI(tokenBody) {
-//    return "ipfs://" + this.cid(tokenBody)
-//  }
   typed(token) {
     const data = {
       domain: token.domain,
@@ -231,7 +232,7 @@ class Token extends Contract {
           { name: 'verifyingContract', type: 'address' },
         ],
         Token: [
-          { name: "collection", type: "address" },
+          { name: "addr", type: "address" },
           { name: "id", type: "uint256" }
         ],
         Body: [
@@ -244,11 +245,11 @@ class Token extends Contract {
           { name: "end", type: "uint64" },
           { name: "royaltyReceiver", type: "address" },
           { name: "royaltyAmount", type: "uint96" },
-          //{ name: "burned", type: "uint256[]" },
-          { name: "burned", type: "Token[]" },
-          { name: "owns", type: "Token[]" },
           { name: "merkleHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },
+          { name: "burned", type: "Token[]" },
+          { name: "owns", type: "Token[]" },
+          { name: "balance", type: "Token[]" },
         ],
       }
     }

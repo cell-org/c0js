@@ -25,6 +25,7 @@ const testDefaults = (token, exclude) => {
   if (!exclude.includes("royaltyAmount")) expect(token.body.royaltyAmount).to.equal("0")
   if (!exclude.includes("burned")) expect(token.body.burned.length).to.equal(0)
   if (!exclude.includes("owns")) expect(token.body.owns.length).to.equal(0)
+  if (!exclude.includes("balance")) expect(token.body.balance.length).to.equal(0)
 
   if (!exclude.includes("senders")) expect(token.body.senders.length).to.equal(0)
   if (!exclude.includes("merkleHash")) expect(token.body.merkleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
@@ -110,6 +111,7 @@ describe("c0.token.build()", () => {
     expect(token.body.royaltyAmount).to.exist
     expect(token.body.burned).to.exist
     expect(token.body.owns).to.exist
+    expect(token.body.balance).to.exist
     expect(token.body.senders).to.exist
     expect(token.body.merkleHash).to.exist
     expect(token.body.puzzleHash).to.exist
