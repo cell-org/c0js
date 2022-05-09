@@ -741,6 +741,11 @@
           {
             "components": [
               {
+                "internalType": "uint8",
+                "name": "role",
+                "type": "uint8"
+              },
+              {
                 "internalType": "address",
                 "name": "addr",
                 "type": "address"
@@ -758,6 +763,11 @@
           {
             "components": [
               {
+                "internalType": "uint8",
+                "name": "role",
+                "type": "uint8"
+              },
+              {
                 "internalType": "address",
                 "name": "addr",
                 "type": "address"
@@ -774,6 +784,11 @@
           },
           {
             "components": [
+              {
+                "internalType": "uint8",
+                "name": "role",
+                "type": "uint8"
+              },
               {
                 "internalType": "address",
                 "name": "addr",
@@ -801,6 +816,11 @@
       },
       {
         "components": [
+          {
+            "internalType": "address",
+            "name": "receiver",
+            "type": "address"
+          },
           {
             "internalType": "bytes",
             "name": "puzzle",

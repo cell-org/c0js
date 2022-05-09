@@ -97,21 +97,24 @@ class Token extends Contract {
     burned = burned.map((b) => {
       return {
         addr: (b.addr ? b.addr : "0x0000000000000000000000000000000000000000"),
-        id: b.id
+        id: b.id,
+        role: (b.role ? b.role : 0),
       }
     })
     let owns = (body.owns ? body.owns : [])
     owns = owns.map((o) => {
       return {
         addr: (o.addr ? o.addr : "0x0000000000000000000000000000000000000000"),
-        id: o.id
+        id: o.id,
+        role: (o.role ? o.role : 0),
       }
     })
     let balance = (body.balance ? body.balance : [])
     balance = balance.map((b) => {
       return {
         addr: (b.addr ? b.addr : "0x0000000000000000000000000000000000000000"),
-        id: b.id
+        id: b.id,
+        role: (b.role ? b.role : 0),
       }
     })
     let r = {
@@ -163,13 +166,13 @@ class Token extends Contract {
     })
     return tx
   }
-  async send(signedTokens, auths, options) {
+  async send(signedTokens, _inputs, options) {
     let signedBodies = []
     let domain = {}
     let value = new this.web3.utils.BN(0)
-    let proofs = []
+    let inputs = []
     for(let i=0; i<signedTokens.length; i++) {
-      proofs[i] = {}
+      inputs[i] = {}
       for(let key in signedTokens[i].domain) {
         let val = signedTokens[i].domain[key]
         if (domain[key] && domain[key] !== val) {
@@ -180,19 +183,25 @@ class Token extends Contract {
         domain[key] = val
       }
       if (signedTokens[i].body.merkleHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-        proofs[i].merkle = new Merkle({
+        inputs[i].merkle = new Merkle({
           web3: this.web3,
           types: ["address"],
           values: signedTokens[i].body.senders.map(m => [m])
         }).proof([this.account])
       } else {
-        proofs[i].merkle = []
+        inputs[i].merkle = []
       }
       if (signedTokens[i].body.puzzleHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-        if (!auths || !auths[i] || !auths[i].puzzle) throw new Error("missing auth: 'puzzle'")
-        proofs[i].puzzle = this.web3.utils.asciiToHex(auths[i].puzzle)
+        if (!_inputs || !_inputs[i] || !_inputs[i].puzzle) throw new Error("missing auth: 'puzzle'")
+        inputs[i].puzzle = this.web3.utils.asciiToHex(_inputs[i].puzzle)
       } else {
-        proofs[i].puzzle = "0x0000000000000000000000000000000000000000000000000000000000000000"
+        inputs[i].puzzle = "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+
+      if (_inputs && _inputs[i] && _inputs[i].receiver) {
+        inputs[i].receiver = _inputs[i].receiver
+      } else {
+        inputs[i].receiver = this.account
       }
 
       // remove the "senders" array and the "cid" attribute from the token
@@ -216,7 +225,7 @@ class Token extends Contract {
         value: value.toString()
       }
     }
-    let tx = await this.methods(domain.verifyingContract).token(signedBodies, proofs).send(o)
+    let tx = await this.methods(domain.verifyingContract).token(signedBodies, inputs).send(o)
     return tx
   }
   typed(token) {
@@ -232,8 +241,9 @@ class Token extends Contract {
           { name: 'verifyingContract', type: 'address' },
         ],
         Token: [
+          { name: "role", type: "uint8" },
           { name: "addr", type: "address" },
-          { name: "id", type: "uint256" }
+          { name: "id", type: "uint256" },
         ],
         Body: [
           { name: "id", type: "uint256" },
