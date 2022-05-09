@@ -74,9 +74,7 @@ class Token extends Contract {
   //    end,
   //    royaltyReceiver,
   //    royaltyAmount,
-  //    burned,
-  //    owns,
-  //    balance,
+  //    relationships,
   //    senders,
   //    puzzle
   //  }
@@ -92,29 +90,13 @@ class Token extends Contract {
     const inspected = CID.inspectBytes(base32.decode(body.cid)) // inspected.codec: 112 (0x70)
     const codec = inspected.codec
     const id = new this.web3.utils.BN(digest).toString();
-
-    let burned = (body.burned ? body.burned : [])
-    burned = burned.map((b) => {
+    let relationships = (body.relationships ? body.relationships : [])
+    relationships = relationships.map((o) => {
+      if (typeof o.code === "undefined") throw new Error("relationship code must be specified");
       return {
-        addr: (b.addr ? b.addr : "0x0000000000000000000000000000000000000000"),
-        id: b.id,
-        role: (b.role ? b.role : 0),
-      }
-    })
-    let owns = (body.owns ? body.owns : [])
-    owns = owns.map((o) => {
-      return {
+        code: o.code,
         addr: (o.addr ? o.addr : "0x0000000000000000000000000000000000000000"),
         id: o.id,
-        role: (o.role ? o.role : 0),
-      }
-    })
-    let balance = (body.balance ? body.balance : [])
-    balance = balance.map((b) => {
-      return {
-        addr: (b.addr ? b.addr : "0x0000000000000000000000000000000000000000"),
-        id: b.id,
-        role: (b.role ? b.role : 0),
       }
     })
     let r = {
@@ -135,9 +117,7 @@ class Token extends Contract {
         end: "" + (body.end ? body.end : new this.web3.utils.BN(2).pow(new this.web3.utils.BN(64)).sub(new this.web3.utils.BN(1)).toString()),
         royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
-        burned,
-        owns,
-        balance
+        relationships,
       }
     }
 
@@ -240,8 +220,8 @@ class Token extends Contract {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
-        Token: [
-          { name: "role", type: "uint8" },
+        Relationship: [
+          { name: "code", type: "uint8" },
           { name: "addr", type: "address" },
           { name: "id", type: "uint256" },
         ],
@@ -257,9 +237,7 @@ class Token extends Contract {
           { name: "royaltyAmount", type: "uint96" },
           { name: "merkleHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },
-          { name: "burned", type: "Token[]" },
-          { name: "owns", type: "Token[]" },
-          { name: "balance", type: "Token[]" },
+          { name: "relationships", type: "Relationship[]" },
         ],
       }
     }
