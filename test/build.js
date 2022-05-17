@@ -23,12 +23,11 @@ const testDefaults = (token, exclude) => {
   if (!exclude.includes("end")) expect(token.body.end).to.equal("18446744073709551615")
   if (!exclude.includes("royaltyReceiver")) expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
   if (!exclude.includes("royaltyAmount")) expect(token.body.royaltyAmount).to.equal("0")
-  if (!exclude.includes("burned")) expect(token.body.burned.length).to.equal(0)
-  if (!exclude.includes("owns")) expect(token.body.owns.length).to.equal(0)
-  if (!exclude.includes("balance")) expect(token.body.balance.length).to.equal(0)
+  if (!exclude.includes("relations")) expect(token.body.relations.length).to.equal(0)
 
   if (!exclude.includes("senders")) expect(token.body.senders.length).to.equal(0)
-  if (!exclude.includes("merkleHash")) expect(token.body.merkleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
+  if (!exclude.includes("sendersHash")) expect(token.body.sendersHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
+  if (!exclude.includes("receiversHash")) expect(token.body.receiversHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
   if (!exclude.includes("puzzleHash")) expect(token.body.puzzleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
 }
 describe("c0.token.build()", () => {
@@ -109,11 +108,10 @@ describe("c0.token.build()", () => {
     expect(token.body.end).to.exist
     expect(token.body.royaltyReceiver).to.exist
     expect(token.body.royaltyAmount).to.exist
-    expect(token.body.burned).to.exist
-    expect(token.body.owns).to.exist
-    expect(token.body.balance).to.exist
+    expect(token.body.relations).to.exist
     expect(token.body.senders).to.exist
-    expect(token.body.merkleHash).to.exist
+    expect(token.body.sendersHash).to.exist
+    expect(token.body.receiversHash).to.exist
     expect(token.body.puzzleHash).to.exist
 
     // check that the signature does NOT exist
@@ -324,7 +322,7 @@ describe("c0.token.build()", () => {
       "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
       c0.account
     ])
-    testDefaults(token, ["senders", "merkleHash"])
+    testDefaults(token, ["senders", "sendersHash"])
   })
   it('puzzle', async () => {
     let meta_cid = await c0.util.cid({
@@ -345,5 +343,112 @@ describe("c0.token.build()", () => {
       }
     })
     testDefaults(token, ["puzzleHash"])
+  })
+  it("should fail if 'owns' doesn't include a 'who'", async () => {
+    let cid = await c0.util.cid({
+      name: "svg",
+      description: "svg example",
+      image: "ipfs://" + svg_cid
+    })
+    const domain = {
+      "address": "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
+      "chainId": 4,
+      "name": "_test_"
+    }
+    try {
+      let token = await c0.token.build({
+        domain,
+        body: {
+          cid,
+          owns: [{
+            where: "0x023457063ac8f3cdbc75d910183b57c873b11d34",
+            what: 1
+          }]
+        }
+      })
+    } catch (e) {
+      expect(e.message).to.equal("'who' attribute must be specified")
+    }
+  })
+  it("should fail if 'burned' doesn't include a 'who'", async () => {
+    let cid = await c0.util.cid({
+      name: "svg",
+      description: "svg example",
+      image: "ipfs://" + svg_cid
+    })
+    const domain = {
+      "address": "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
+      "chainId": 4,
+      "name": "_test_"
+    }
+    try {
+      let token = await c0.token.build({
+        domain,
+        body: {
+          cid,
+          burned: [{
+            where: "0x023457063ac8f3cdbc75d910183b57c873b11d34",
+            what: 1
+          }]
+        }
+      })
+    } catch (e) {
+      expect(e.message).to.equal("'who' attribute must be specified")
+    }
+  })
+  it("should fail if 'balance' doesn't include a 'who'", async () => {
+    let cid = await c0.util.cid({
+      name: "svg",
+      description: "svg example",
+      image: "ipfs://" + svg_cid
+    })
+    const domain = {
+      "address": "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
+      "chainId": 4,
+      "name": "_test_"
+    }
+    try {
+      let token = await c0.token.build({
+        domain,
+        body: {
+          cid,
+          burned: [{
+            what: 2
+          }]
+        }
+      })
+    } catch (e) {
+      expect(e.message).to.equal("'who' attribute must be specified")
+    }
+  })
+  it("should fail if 'owns' doesn't include a 'who' even in one of the items", async () => {
+    let cid = await c0.util.cid({
+      name: "svg",
+      description: "svg example",
+      image: "ipfs://" + svg_cid
+    })
+    const domain = {
+      "address": "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
+      "chainId": 4,
+      "name": "_test_"
+    }
+    try {
+      let token = await c0.token.build({
+        domain,
+        body: {
+          cid,
+          owns: [{
+            who: "sender",
+            where: "0x023457063ac8f3cdbc75d910183b57c873b11d34",
+            what: 1
+          }, {
+            where: "0x023457063ac8f3cdbc75d910183b57c873b11d34",
+            what: 1
+          }]
+        }
+      })
+    } catch (e) {
+      expect(e.message).to.equal("'who' attribute must be specified")
+    }
   })
 })
