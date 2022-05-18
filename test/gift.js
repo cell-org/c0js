@@ -55,12 +55,11 @@ describe("c0.gift", () => {
     expect(gift.body.id).to.exist
     expect(gift.body.encoding).to.exist
     expect(gift.body.receiver).to.exist
-    expect(gift.body.royaltyReceiver).to.exist
-    expect(gift.body.royaltyAmount).to.exist
+    expect(gift.body.payments).to.deep.equal([])
 
     expect(gift.body.cid).to.equal(meta_cid)
     expect(gift.body.receiver).to.equal(c0.account)
-    expect(gift.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
-    expect(gift.body.royaltyAmount).to.equal("0")
+  })
+  it("royalty with gift", async () => {
   })
 })

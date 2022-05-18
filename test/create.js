@@ -89,8 +89,7 @@ describe("c0.token.create()", () => {
     expect(token.body.value).to.exist
     expect(token.body.start).to.exist
     expect(token.body.end).to.exist
-    expect(token.body.royaltyReceiver).to.exist
-    expect(token.body.royaltyAmount).to.exist
+    expect(token.body.payments).to.exist
     expect(token.body.relations).to.exist
     expect(token.body.senders).to.exist
     expect(token.body.receivers).to.exist
@@ -127,8 +126,7 @@ describe("c0.token.create()", () => {
     expect(token.body.value).to.equal("0")
     expect(token.body.start).to.equal("0")
     expect(token.body.end).to.equal("18446744073709551615")
-    expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
-    expect(token.body.royaltyAmount).to.equal("0")
+    expect(token.body.payments).to.deep.equal([])
     expect(token.body.relations.length).to.equal(0)
     expect(token.body.senders.length).to.equal(0)
     expect(token.body.receivers.length).to.equal(0)

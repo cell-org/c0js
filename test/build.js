@@ -21,8 +21,7 @@ const testDefaults = (token, exclude) => {
   if (!exclude.includes("value")) expect(token.body.value).to.equal("0")
   if (!exclude.includes("start")) expect(token.body.start).to.equal("0")
   if (!exclude.includes("end")) expect(token.body.end).to.equal("18446744073709551615")
-  if (!exclude.includes("royaltyReceiver")) expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
-  if (!exclude.includes("royaltyAmount")) expect(token.body.royaltyAmount).to.equal("0")
+  if (!exclude.includes("payments")) expect(token.body.payments.length).to.equal(0)
   if (!exclude.includes("relations")) expect(token.body.relations.length).to.equal(0)
 
   if (!exclude.includes("senders")) expect(token.body.senders.length).to.equal(0)
@@ -106,8 +105,7 @@ describe("c0.token.build()", () => {
     expect(token.body.value).to.exist
     expect(token.body.start).to.exist
     expect(token.body.end).to.exist
-    expect(token.body.royaltyReceiver).to.exist
-    expect(token.body.royaltyAmount).to.exist
+    expect(token.body.payments).to.exist
     expect(token.body.relations).to.exist
     expect(token.body.senders).to.exist
     expect(token.body.sendersHash).to.exist
@@ -243,15 +241,20 @@ describe("c0.token.build()", () => {
       domain: domain,
       body: {
         cid: meta_cid,
-        royaltyAmount: 100000, // 10%
-        royaltyReceiver: c0.account
+        payments: [{
+          code: 1,
+          value: 100000,    // 10%
+          receiver: c0.account
+        }]
       }
     })
-    expect(token.body.royaltyAmount).to.equal("100000")
-    expect(token.body.royaltyReceiver).to.equal(c0.account)
-    testDefaults(token, ["end", "royaltyAmount", "royaltyReceiver"])
+    expect(token.body.payments.length).to.equal(1)
+    expect(token.body.payments[0].code).to.equal(1)
+    expect(token.body.payments[0].value).to.equal(100000)
+    expect(token.body.payments[0].receiver).to.equal(c0.account)
+    testDefaults(token, ["end", "payments"])
   })
-  it('royalty with no royaltyAmount will create royaltyAmount of 0 by default', async () => {
+  it('royalty with no payments will create an empty payments array by default', async () => {
     let meta_cid = await c0.util.cid({
       name: "svg",
       description: "svg example",
@@ -266,34 +269,11 @@ describe("c0.token.build()", () => {
       domain: domain,
       body: {
         cid: meta_cid,
-        royaltyReceiver: c0.account
       }
     })
-    expect(token.body.royaltyAmount).to.equal("0")
-    expect(token.body.royaltyReceiver).to.equal(c0.account)
-    testDefaults(token, ["royaltyReceiver"])
-  })
-  it('royalty with no royaltyReceiver will create royaltyReceiver of 0x0 address by default', async () => {
-    let meta_cid = await c0.util.cid({
-      name: "svg",
-      description: "svg example",
-      image: "ipfs://" + svg_cid
-    })
-    const domain = {
-      "address": "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
-      "chainId": 4,
-      "name": "_test_"
-    }
-    let token = await c0.token.build({
-      domain: domain,
-      body: {
-        cid: meta_cid,
-        royaltyAmount: 100000, // 10%
-      }
-    })
-    expect(token.body.royaltyAmount).to.equal("100000")
-    expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
-    testDefaults(token, ["royaltyAmount"])
+    expect(token.body.payments.length).to.equal(0)
+    expect(token.body.payments).to.deep.equal([])
+    testDefaults(token, ["payments"])
   })
   it('senders', async () => {
     let meta_cid = await c0.util.cid({

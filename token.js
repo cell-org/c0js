@@ -74,8 +74,7 @@ class Token extends Contract {
     //      value,
     //      start,
     //      end,
-    //      royaltyReceiver,
-    //      royaltyAmount,
+    //      payments,
     //      owns,
     //      burned,
     //      balance,
@@ -168,8 +167,7 @@ class Token extends Contract {
         value: "" + (body.value ? body.value : 0),
         start: "" + (body.start ? body.start : 0),
         end: "" + (body.end ? body.end : new this.web3.utils.BN(2).pow(new this.web3.utils.BN(64)).sub(new this.web3.utils.BN(1)).toString()),
-        royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
-        royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
+        payments: (body.payments ? body.payments : []),
         relations,
       }
     }
@@ -295,6 +293,11 @@ class Token extends Contract {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
+        Payment: [
+          { name: "code", type: "uint8" },
+          { name: "value", type: "uint24" },
+          { name: "receiver", type: "address" },
+        ],
         Relation: [
           { name: "code", type: "uint8" },
           { name: "addr", type: "address" },
@@ -308,8 +311,7 @@ class Token extends Contract {
           { name: "value", type: "uint128" },
           { name: "start", type: "uint64" },
           { name: "end", type: "uint64" },
-          { name: "royaltyReceiver", type: "address" },
-          { name: "royaltyAmount", type: "uint96" },
+          { name: "payments", type: "Payment[]" },
           { name: "sendersHash", type: "bytes32" },
           { name: "receiversHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },

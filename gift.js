@@ -23,8 +23,7 @@ class Gift extends Contract {
     //    body: {
     //      cid,                      // required
     //      receiver,                 // required
-    //      royaltyReceiver,          // optional
-    //      royaltyAmount             // optional
+    //      payments,                 // optional
     //    },
     //    domain: <domain>
     //  }
@@ -41,8 +40,7 @@ class Gift extends Contract {
         id: id,
         encoding: (codec === 85 ? 0 : 1),  // 0x55 is raw (0), 0x70 is dag-pb (1)
         receiver: body.receiver,
-        royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
-        royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
+        payments: (body.payments ? body.payments : []),
       },
       domain: {
         name: domain.name,
@@ -59,8 +57,7 @@ class Gift extends Contract {
     //      id,                   // tokenId
     //      encoding,             // 0 (raw) / 1 (dag-pb)
     //      receiver,             // receiver address
-    //      royaltyReceiver,      // royalty receiver
-    //      royaltyAmount,        // royalty amount
+    //      payments,             // payments
     //    },
     //    domain: {
     //      address,              // contract address
