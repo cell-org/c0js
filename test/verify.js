@@ -36,7 +36,7 @@ describe("c0.util.verify()", () => {
     let isvalid = c0.util.verify(gift.body)
     expect(isvalid).to.be.true
   })
-  it('verify an invalid gift: wrong "raw" attribute', async () => {
+  it('verify an invalid gift: wrong "encoding" attribute', async () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
     let gift = await c0.gift.create({
@@ -46,8 +46,8 @@ describe("c0.util.verify()", () => {
       },
       domain: {}
     })
-    // modify gift's "raw" attribute
-    gift.body.raw = false
+    // modify gift's "encoding" attribute
+    gift.body.encoding = 1
     let isvalid = c0.util.verify(gift.body)
     expect(isvalid).to.be.false
   })
@@ -61,7 +61,7 @@ describe("c0.util.verify()", () => {
       },
       domain: {}
     })
-    // modify gift's "raw" attribute
+    // modify gift's "encoding" attribute
     gift.body.cid = "bafkreiecoogmguhvhvslpait4kknvmic5344dgvrs3l5migok5aj33pcei"
     let isvalid = c0.util.verify(gift.body)
     expect(isvalid).to.be.false
@@ -78,7 +78,7 @@ describe("c0.util.verify()", () => {
     let isvalid = c0.util.verify(token.body)
     expect(isvalid).to.be.true
   })
-  it('verify an invalid unsigned token: wrong "raw" attribute', async () => {
+  it('verify an invalid unsigned token: wrong "encoding" attribute', async () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
     let token = await c0.token.build({
@@ -87,8 +87,8 @@ describe("c0.util.verify()", () => {
         cid: meta_cid,
       }
     })
-    // modify gift's "raw" attribute
-    token.body.raw = false
+    // modify gift's "encoding" attribute
+    token.body.encoding = 1
     let isvalid = c0.util.verify(token.body)
     expect(isvalid).to.be.false
   })
@@ -101,7 +101,7 @@ describe("c0.util.verify()", () => {
         cid: meta_cid,
       }
     })
-    // modify gift's "raw" attribute
+    // modify gift's "encoding" attribute
     token.body.cid = "bafkreiecoogmguhvhvslpait4kknvmic5344dgvrs3l5migok5aj33pcei"
     let isvalid = c0.util.verify(token.body)
     expect(isvalid).to.be.false
@@ -118,7 +118,7 @@ describe("c0.util.verify()", () => {
     let isvalid = c0.util.verify(token.body)
     expect(isvalid).to.be.true
   })
-  it('verify an invalid signed token: wrong "raw" attribute', async () => {
+  it('verify an invalid signed token: wrong "encoding" attribute', async () => {
     let cid = await c0.util.cid("demo string")
     let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
     let token = await c0.token.create({
@@ -127,8 +127,8 @@ describe("c0.util.verify()", () => {
         cid: meta_cid,
       }
     })
-    // modify gift's "raw" attribute
-    token.body.raw = false
+    // modify gift's "encoding" attribute
+    token.body.encoding = 1
     let isvalid = c0.util.verify(token.body)
     expect(isvalid).to.be.false
   })
@@ -141,7 +141,7 @@ describe("c0.util.verify()", () => {
         cid: meta_cid,
       }
     })
-    // modify gift's "raw" attribute
+    // modify gift's "encoding" attribute
     token.body.cid = "bafkreiecoogmguhvhvslpait4kknvmic5344dgvrs3l5migok5aj33pcei"
     let isvalid = c0.util.verify(token.body)
     expect(isvalid).to.be.false

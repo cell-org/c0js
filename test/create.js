@@ -13,7 +13,7 @@ const CHAINID = 4
 const nebulus = new Nebulus();
 var Token
 var Collection
-describe("c0.token.build()", () => {
+describe("c0.token.create()", () => {
   beforeEach(async () => {
     c0 = new C0()
     await c0.init({ web3, key: process.env.RINKEBY_PRIVATE_KEY })
@@ -83,15 +83,19 @@ describe("c0.token.build()", () => {
     // Check the body attributes
     expect(token.body.cid).to.exist
     expect(token.body.id).to.exist
-    expect(token.body.raw).to.exist
+    expect(token.body.encoding).to.exist
     expect(token.body.sender).to.exist
+    expect(token.body.receiver).to.exist
     expect(token.body.value).to.exist
     expect(token.body.start).to.exist
     expect(token.body.end).to.exist
     expect(token.body.royaltyReceiver).to.exist
     expect(token.body.royaltyAmount).to.exist
+    expect(token.body.relations).to.exist
     expect(token.body.senders).to.exist
-    expect(token.body.merkleHash).to.exist
+    expect(token.body.receivers).to.exist
+    expect(token.body.sendersHash).to.exist
+    expect(token.body.receiversHash).to.exist
     expect(token.body.puzzleHash).to.exist
 
     // check that the signature exists
@@ -119,13 +123,17 @@ describe("c0.token.build()", () => {
 
     expect(token.body.cid).to.equal(meta_cid)
     expect(token.body.sender).to.equal("0x0000000000000000000000000000000000000000")
+    expect(token.body.receiver).to.equal("0x0000000000000000000000000000000000000000")
     expect(token.body.value).to.equal("0")
     expect(token.body.start).to.equal("0")
     expect(token.body.end).to.equal("18446744073709551615")
     expect(token.body.royaltyReceiver).to.equal("0x0000000000000000000000000000000000000000")
     expect(token.body.royaltyAmount).to.equal("0")
+    expect(token.body.relations.length).to.equal(0)
     expect(token.body.senders.length).to.equal(0)
-    expect(token.body.merkleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
+    expect(token.body.receivers.length).to.equal(0)
+    expect(token.body.sendersHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
+    expect(token.body.receiversHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
     expect(token.body.puzzleHash).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000")
 
   })

@@ -64,21 +64,32 @@ class Token extends Contract {
     let signedToken = await this.sign(unsignedToken)
     return signedToken
   }
-  //
-  //  body := {
-  //    cid,
-  //    sender,
-  //    receiver,
-  //    value,
-  //    start,
-  //    end,
-  //    royaltyReceiver,
-  //    royaltyAmount,
-  //    senders,
-  //    puzzle
-  //  }
-  //
   async build(o) {
+    //
+    //  o :- {
+    //    body: {
+    //      cid (required),
+    //      sender,
+    //      receiver,
+    //      value,
+    //      start,
+    //      end,
+    //      royaltyReceiver,
+    //      royaltyAmount,
+    //      owns,
+    //      burned,
+    //      balance,
+    //      senders,
+    //      receivers,
+    //      puzzle
+    //    },
+    //    domain: {
+    //      name,
+    //      chainId,
+    //      address
+    //    }
+    //  }
+    //
     if (!o.body) throw new Error("body missing")
     if (!o.domain) throw new Error("domain missing")
     if (!o.body.cid) throw new Error("cid missing");
@@ -88,8 +99,59 @@ class Token extends Contract {
     const bytes = base32.decode(body.cid)
     const inspected = CID.inspectBytes(base32.decode(body.cid)) // inspected.codec: 112 (0x70)
     const codec = inspected.codec
-    //const id = "0x" + digest.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
     const id = new this.web3.utils.BN(digest).toString();
+
+    //
+    //  burned: [{
+    //    who: <"sender"|"receiver">,
+    //    where: contract_address,
+    //    what: tokenId
+    //  }],
+    //  owns: [{
+    //    who: <"sender"|"receiver">,
+    //    where: contract_address,
+    //    what: tokenId
+    //  }],
+    //  balance: [{
+    //    who: <"sender"|"receiver">,
+    //    where: contract_address (ERC20|ERC721),
+    //    what: balance
+    //  }]
+    //
+    let burned = (body.burned ? body.burned : []).map((item) => {
+      if (item.who === "sender" || item.who === "receiver") {
+        return {
+          code: (item.who === "sender" ? 0 : 1),
+          addr: (item.where ? item.where : "0x0000000000000000000000000000000000000000"),
+          id: item.what,
+        }
+      } else {
+        throw new Error("'who' attribute must be specified")
+      }
+    })
+    let owns = (body.owns ? body.owns : []).map((item) => {
+      if (item.who === "sender" || item.who === "receiver") {
+        return {
+          code: (item.who === "sender" ? 2 : 3),
+          addr: (item.where ? item.where : "0x0000000000000000000000000000000000000000"),
+          id: item.what,
+        }
+      } else {
+        throw new Error("'who' attribute must be specified")
+      }
+    })
+    let balance = (body.balance ? body.balance : []).map((item) => {
+      if (item.who === "sender" || item.who === "receiver") {
+        return {
+          code: (item.who === "sender" ? 4 : 5),
+          addr: (item.where ? item.where : "0x0000000000000000000000000000000000000000"),
+          id: item.what,
+        }
+      } else {
+        throw new Error("'who' attribute must be specified")
+      }
+    })
+    let relations = [].concat(burned).concat(owns).concat(balance)
     let r = {
       domain: {
         name: domain.name,
@@ -100,7 +162,7 @@ class Token extends Contract {
       body: {
         cid: body.cid,
         id: id,
-        raw: (codec === 85),  // 0x55 is raw, 0x70 is dag-pb
+        encoding: (codec === 85 ? 0 : 1),  // 0x55 is raw (0), 0x70 is dag-pb (1)
         sender: (body.sender ? body.sender : "0x0000000000000000000000000000000000000000"),
         receiver: (body.receiver ? body.receiver : "0x0000000000000000000000000000000000000000"),
         value: "" + (body.value ? body.value : 0),
@@ -108,12 +170,12 @@ class Token extends Contract {
         end: "" + (body.end ? body.end : new this.web3.utils.BN(2).pow(new this.web3.utils.BN(64)).sub(new this.web3.utils.BN(1)).toString()),
         royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
+        relations,
       }
     }
-
-    // advanced auth
+    // senders merkle proof
     if (o.body.senders) {
-      r.body.merkleHash = new Merkle({
+      r.body.sendersHash = new Merkle({
         web3: this.web3,
         types: ["address"],
         values: o.body.senders.map(m => [m])
@@ -121,8 +183,21 @@ class Token extends Contract {
       r.body.senders = o.body.senders
     } else {
       r.body.senders = []
-      r.body.merkleHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
+      r.body.sendersHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
     }
+    // receivers merkle proof
+    if (o.body.receivers) {
+      r.body.receiversHash = new Merkle({
+        web3: this.web3,
+        types: ["address"],
+        values: o.body.receivers.map(m => [m])
+      }).root()
+      r.body.receivers = o.body.receivers
+    } else {
+      r.body.receivers = []
+      r.body.receiversHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+    // hash puzzle
     if (o.body.puzzle) {
       r.body.puzzleHash = this.web3.utils.soliditySha3(o.body.puzzle)
     } else {
@@ -130,13 +205,24 @@ class Token extends Contract {
     }
     return r
   }
-  async send(signedTokens, auths, options) {
+  async burn(address, ids) {
+    let tx = await this.methods(address).burn(ids).send({
+      from: this.account
+    })
+    return tx
+  }
+  async send(signedTokens, _inputs, options) {
     let signedBodies = []
     let domain = {}
     let value = new this.web3.utils.BN(0)
-    let proofs = []
+    let inputs = []
     for(let i=0; i<signedTokens.length; i++) {
-      proofs[i] = {}
+      inputs[i] = {}
+      if (_inputs && _inputs[i] && _inputs[i].receiver) {
+        inputs[i].receiver = _inputs[i].receiver
+      } else {
+        inputs[i].receiver = this.account
+      }
       for(let key in signedTokens[i].domain) {
         let val = signedTokens[i].domain[key]
         if (domain[key] && domain[key] !== val) {
@@ -146,25 +232,36 @@ class Token extends Contract {
         }
         domain[key] = val
       }
-      if (signedTokens[i].body.merkleHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-        proofs[i].merkle = new Merkle({
+      if (signedTokens[i].body.sendersHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        inputs[i].sendersProof = new Merkle({
           web3: this.web3,
           types: ["address"],
           values: signedTokens[i].body.senders.map(m => [m])
         }).proof([this.account])
       } else {
-        proofs[i].merkle = []
+        inputs[i].sendersProof = []
+      }
+      if (signedTokens[i].body.receiversHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        inputs[i].receiversProof = new Merkle({
+          web3: this.web3,
+          types: ["address"],
+          values: signedTokens[i].body.receivers.map(m => [m])
+        }).proof([inputs[i].receiver])
+      } else {
+        inputs[i].receiversProof = []
       }
       if (signedTokens[i].body.puzzleHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-        if (!auths || !auths[i] || !auths[i].puzzle) throw new Error("missing auth: 'puzzle'")
-        proofs[i].puzzle = this.web3.utils.asciiToHex(auths[i].puzzle)
+        if (!_inputs || !_inputs[i] || !_inputs[i].puzzle) throw new Error("missing auth: 'puzzle'")
+        inputs[i].puzzle = this.web3.utils.asciiToHex(_inputs[i].puzzle)
       } else {
-        proofs[i].puzzle = "0x0000000000000000000000000000000000000000000000000000000000000000"
+        inputs[i].puzzle = "0x0000000000000000000000000000000000000000000000000000000000000000"
       }
+
 
       // remove the "senders" array and the "cid" attribute from the token
       let body = Object.assign({}, signedTokens[i].body)
       delete body.senders
+      delete body.receivers
       delete body.cid
 
       signedBodies.push(body)
@@ -183,23 +280,9 @@ class Token extends Contract {
         value: value.toString()
       }
     }
-    let tx = await this.methods(domain.verifyingContract).token(signedBodies, proofs).send(o)
+    let tx = await this.methods(domain.verifyingContract).token(signedBodies, inputs).send(o)
     return tx
   }
-//  cid(tokenBody) {
-//    if (!tokenBody) throw new Error("must pass a token object with 'id' and 'raw' attributes")
-//    if (!tokenBody.id) throw new Error('id missing');
-//    const code = (tokenBody.raw ? 85 : 112);
-//    const multiHashCode = 18  // sha256
-//    const hexId = this.web3.utils.toHex(tokenBody.id)
-//    const padded = hexId.slice(2).padStart(64, '0')
-//    const d = Uint8Array.from(Buffer.from(padded, 'hex'));
-//    const digest = create(multiHashCode, d)
-//    return CID.create(1, code, digest).toString()
-//  }
-//  tokenURI(tokenBody) {
-//    return "ipfs://" + this.cid(tokenBody)
-//  }
   typed(token) {
     const data = {
       domain: token.domain,
@@ -212,9 +295,14 @@ class Token extends Contract {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
+        Relation: [
+          { name: "code", type: "uint8" },
+          { name: "addr", type: "address" },
+          { name: "id", type: "uint256" },
+        ],
         Body: [
           { name: "id", type: "uint256" },
-          { name: "raw", type: "bool" },
+          { name: "encoding", type: "uint8" },
           { name: "sender", type: "address" },
           { name: "receiver", type: "address" },
           { name: "value", type: "uint128" },
@@ -222,8 +310,10 @@ class Token extends Contract {
           { name: "end", type: "uint64" },
           { name: "royaltyReceiver", type: "address" },
           { name: "royaltyAmount", type: "uint96" },
-          { name: "merkleHash", type: "bytes32" },
+          { name: "sendersHash", type: "bytes32" },
+          { name: "receiversHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },
+          { name: "relations", type: "Relation[]" },
         ],
       }
     }

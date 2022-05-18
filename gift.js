@@ -14,7 +14,6 @@ class Gift extends Contract {
     return super.contract(address) 
   }
   async create(o) {
-    console.log("O", o)
     if (!o) throw new Error("body & domain missing")
     if (!o.body) throw new Error("body missing")
     if (!o.domain) throw new Error("domain missing")
@@ -40,7 +39,7 @@ class Gift extends Contract {
       body: {
         cid: body.cid,
         id: id,
-        raw: (codec === 85),  // 0x55 is raw, 0x70 is dag-pb
+        encoding: (codec === 85 ? 0 : 1),  // 0x55 is raw (0), 0x70 is dag-pb (1)
         receiver: body.receiver,
         royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
         royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
@@ -58,7 +57,7 @@ class Gift extends Contract {
     //    body: {
     //      cid,                  // metadata cid (must be removed before submitting to the blockchain)
     //      id,                   // tokenId
-    //      raw,                  // true/false
+    //      encoding,             // 0 (raw) / 1 (dag-pb)
     //      receiver,             // receiver address
     //      royaltyReceiver,      // royalty receiver
     //      royaltyAmount,        // royalty amount
