@@ -74,8 +74,7 @@ class Token extends Contract {
     //      value,
     //      start,
     //      end,
-    //      royaltyReceiver,
-    //      royaltyAmount,
+    //      payments,
     //      owns,
     //      burned,
     //      balance,
@@ -151,7 +150,29 @@ class Token extends Contract {
         throw new Error("'who' attribute must be specified")
       }
     })
-    let relations = [].concat(burned).concat(owns).concat(balance)
+    let royalty = (body.royalty ? [body.royalty] : []).map((item) => {
+      if (item.where && item.what) {
+        return {
+          code: 11,
+          addr: item.where,
+          id: item.what,
+        }
+      } else {
+        throw new Error("'where' and 'what' attributes must be specified")
+      }
+    })
+    let payments = (body.payments ? body.payments : []).map((item) => {
+      if (item.where && item.what) {
+        return {
+          code: 10,
+          addr: item.where,
+          id: item.what,
+        }
+      } else {
+        throw new Error("'where' and 'what' attributes must be specified")
+      }
+    })
+    let relations = [].concat(burned).concat(owns).concat(balance).concat(royalty).concat(payments)
     let r = {
       domain: {
         name: domain.name,
@@ -168,8 +189,6 @@ class Token extends Contract {
         value: "" + (body.value ? body.value : 0),
         start: "" + (body.start ? body.start : 0),
         end: "" + (body.end ? body.end : new this.web3.utils.BN(2).pow(new this.web3.utils.BN(64)).sub(new this.web3.utils.BN(1)).toString()),
-        royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
-        royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
         relations,
       }
     }
@@ -308,8 +327,6 @@ class Token extends Contract {
           { name: "value", type: "uint128" },
           { name: "start", type: "uint64" },
           { name: "end", type: "uint64" },
-          { name: "royaltyReceiver", type: "address" },
-          { name: "royaltyAmount", type: "uint96" },
           { name: "sendersHash", type: "bytes32" },
           { name: "receiversHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },

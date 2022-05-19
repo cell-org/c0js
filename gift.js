@@ -23,8 +23,7 @@ class Gift extends Contract {
     //    body: {
     //      cid,                      // required
     //      receiver,                 // required
-    //      royaltyReceiver,          // optional
-    //      royaltyAmount             // optional
+    //      payments,                 // optional
     //    },
     //    domain: <domain>
     //  }
@@ -35,14 +34,24 @@ class Gift extends Contract {
     const inspected = CID.inspectBytes(base32.decode(body.cid)) // inspected.codec: 112 (0x70)
     const codec = inspected.codec
     const id = new this.web3.utils.BN(digest).toString();
+    const relations = (body.royalty ? [body.royalty] : []).map((item) => {
+      if (item.where && item.what) {
+        return {
+          code: 11,
+          addr: item.where,
+          id: item.what,
+        }
+      } else {
+        throw new Error("'where' and 'what' attributes required")
+      }
+    })
     return {
       body: {
         cid: body.cid,
         id: id,
         encoding: (codec === 85 ? 0 : 1),  // 0x55 is raw (0), 0x70 is dag-pb (1)
         receiver: body.receiver,
-        royaltyReceiver: (body.royaltyReceiver ? body.royaltyReceiver : "0x0000000000000000000000000000000000000000"),
-        royaltyAmount: "" + (body.royaltyAmount ? body.royaltyAmount : 0),
+        relations
       },
       domain: {
         name: domain.name,
@@ -59,8 +68,7 @@ class Gift extends Contract {
     //      id,                   // tokenId
     //      encoding,             // 0 (raw) / 1 (dag-pb)
     //      receiver,             // receiver address
-    //      royaltyReceiver,      // royalty receiver
-    //      royaltyAmount,        // royalty amount
+    //      payments,             // payments
     //    },
     //    domain: {
     //      address,              // contract address
