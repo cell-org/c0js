@@ -21,7 +21,6 @@ const testDefaults = (token, exclude) => {
   if (!exclude.includes("value")) expect(token.body.value).to.equal("0")
   if (!exclude.includes("start")) expect(token.body.start).to.equal("0")
   if (!exclude.includes("end")) expect(token.body.end).to.equal("18446744073709551615")
-  if (!exclude.includes("payments")) expect(token.body.payments.length).to.equal(0)
   if (!exclude.includes("relations")) expect(token.body.relations.length).to.equal(0)
 
   if (!exclude.includes("senders")) expect(token.body.senders.length).to.equal(0)
@@ -105,7 +104,6 @@ describe("c0.token.build()", () => {
     expect(token.body.value).to.exist
     expect(token.body.start).to.exist
     expect(token.body.end).to.exist
-    expect(token.body.payments).to.exist
     expect(token.body.relations).to.exist
     expect(token.body.senders).to.exist
     expect(token.body.sendersHash).to.exist
@@ -241,18 +239,18 @@ describe("c0.token.build()", () => {
       domain: domain,
       body: {
         cid: meta_cid,
-        payments: [{
-          code: 1,
-          value: 100000,    // 10%
-          receiver: c0.account
-        }]
+        royalty: {
+          what: 100000,    // 10%
+          where: c0.account
+        }
       }
     })
-    expect(token.body.payments.length).to.equal(1)
-    expect(token.body.payments[0].code).to.equal(1)
-    expect(token.body.payments[0].value).to.equal(100000)
-    expect(token.body.payments[0].receiver).to.equal(c0.account)
-    testDefaults(token, ["end", "payments"])
+    console.log("token", token)
+    expect(token.body.relations.length).to.equal(1)
+    expect(token.body.relations[0].code).to.equal(11)
+    expect(token.body.relations[0].id).to.equal(100000)
+    expect(token.body.relations[0].addr).to.equal(c0.account)
+    testDefaults(token, ["end", "relations"])
   })
   it('royalty with no payments will create an empty payments array by default', async () => {
     let meta_cid = await c0.util.cid({
@@ -271,9 +269,9 @@ describe("c0.token.build()", () => {
         cid: meta_cid,
       }
     })
-    expect(token.body.payments.length).to.equal(0)
-    expect(token.body.payments).to.deep.equal([])
-    testDefaults(token, ["payments"])
+    expect(token.body.relations.length).to.equal(0)
+    expect(token.body.relations).to.deep.equal([])
+    testDefaults(token, ["relations"])
   })
   it('senders', async () => {
     let meta_cid = await c0.util.cid({
@@ -430,5 +428,81 @@ describe("c0.token.build()", () => {
     } catch (e) {
       expect(e.message).to.equal("'who' attribute must be specified")
     }
+  })
+  it('owns + royalty', async () => {
+    let cid = await c0.util.cid({
+      name: "svg",
+      description: "svg example",
+      image: "ipfs://" + svg_cid
+    })
+    const domain = {
+      "address": "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
+      "chainId": 4,
+      "name": "_test_"
+    }
+    let token = await c0.token.build({
+      domain,
+      body: {
+        cid,
+        owns: [{
+          who: "sender",
+          where: "0x023457063ac8f3cdbc75d910183b57c873b11d34",
+          what: 1
+        }],
+        royalty: {
+          where: c0.account,
+          what: 10 ** 8
+        }
+      }
+    })
+    console.log("token", JSON.stringify(token, null, 2))
+
+    expect(token.body.relations.length).to.equal(2)
+    expect(token.body.relations[0].code).to.equal(2)
+    expect(token.body.relations[1].code).to.equal(11)
+
+    expect(token.body.relations[0].addr).to.equal("0x023457063ac8f3cdbc75d910183b57c873b11d34")
+    expect(token.body.relations[1].addr).to.equal(c0.account)
+
+    expect(token.body.relations[0].id).to.equal(1)
+    expect(token.body.relations[1].id).to.equal(10 ** 8)
+
+  })
+  it('royalty + payment', async () => {
+    let cid = await c0.util.cid({
+      name: "svg",
+      description: "svg example",
+      image: "ipfs://" + svg_cid
+    })
+    const domain = {
+      "address": "0x93f4f1e0dca38dd0d35305d57c601f829ee53b51",
+      "chainId": 4,
+      "name": "_test_"
+    }
+    let token = await c0.token.build({
+      domain,
+      body: {
+        cid,
+        royalty: {
+          where: c0.account,
+          what: 10 ** 8
+        },
+        payments: [{
+          where: c0.account,
+          what: 10**7
+        }]
+      }
+    })
+    console.log("token", JSON.stringify(token, null, 2))
+
+    expect(token.body.relations.length).to.equal(2)
+    expect(token.body.relations[0].code).to.equal(11)
+    expect(token.body.relations[1].code).to.equal(10)
+
+    expect(token.body.relations[0].addr).to.equal(c0.account)
+    expect(token.body.relations[1].addr).to.equal(c0.account)
+
+    expect(token.body.relations[0].id).to.equal(10 ** 8)
+    expect(token.body.relations[1].id).to.equal(10 ** 7)
   })
 })

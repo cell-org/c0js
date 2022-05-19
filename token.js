@@ -150,7 +150,29 @@ class Token extends Contract {
         throw new Error("'who' attribute must be specified")
       }
     })
-    let relations = [].concat(burned).concat(owns).concat(balance)
+    let royalty = (body.royalty ? [body.royalty] : []).map((item) => {
+      if (item.where && item.what) {
+        return {
+          code: 11,
+          addr: item.where,
+          id: item.what,
+        }
+      } else {
+        throw new Error("'where' and 'what' attributes must be specified")
+      }
+    })
+    let payments = (body.payments ? body.payments : []).map((item) => {
+      if (item.where && item.what) {
+        return {
+          code: 10,
+          addr: item.where,
+          id: item.what,
+        }
+      } else {
+        throw new Error("'where' and 'what' attributes must be specified")
+      }
+    })
+    let relations = [].concat(burned).concat(owns).concat(balance).concat(royalty).concat(payments)
     let r = {
       domain: {
         name: domain.name,
@@ -167,7 +189,6 @@ class Token extends Contract {
         value: "" + (body.value ? body.value : 0),
         start: "" + (body.start ? body.start : 0),
         end: "" + (body.end ? body.end : new this.web3.utils.BN(2).pow(new this.web3.utils.BN(64)).sub(new this.web3.utils.BN(1)).toString()),
-        payments: (body.payments ? body.payments : []),
         relations,
       }
     }
@@ -293,11 +314,11 @@ class Token extends Contract {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
-        Payment: [
-          { name: "code", type: "uint8" },
-          { name: "value", type: "uint24" },
-          { name: "receiver", type: "address" },
-        ],
+//        Payment: [
+//          { name: "code", type: "uint8" },
+//          { name: "value", type: "uint24" },
+//          { name: "receiver", type: "address" },
+//        ],
         Relation: [
           { name: "code", type: "uint8" },
           { name: "addr", type: "address" },
@@ -311,7 +332,7 @@ class Token extends Contract {
           { name: "value", type: "uint128" },
           { name: "start", type: "uint64" },
           { name: "end", type: "uint64" },
-          { name: "payments", type: "Payment[]" },
+//          { name: "payments", type: "Payment[]" },
           { name: "sendersHash", type: "bytes32" },
           { name: "receiversHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },

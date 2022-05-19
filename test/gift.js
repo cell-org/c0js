@@ -55,11 +55,36 @@ describe("c0.gift", () => {
     expect(gift.body.id).to.exist
     expect(gift.body.encoding).to.exist
     expect(gift.body.receiver).to.exist
-    expect(gift.body.payments).to.deep.equal([])
+    expect(gift.body.relations).to.deep.equal([])
 
     expect(gift.body.cid).to.equal(meta_cid)
     expect(gift.body.receiver).to.equal(c0.account)
   })
   it("royalty with gift", async () => {
+    let cid = await c0.util.cid("demo string")
+    let meta_cid = await c0.util.cid({ name: "demo", description: "demo example", image: "ipfs://" + cid })
+    let gift = await c0.gift.create({
+      body: {
+        cid: meta_cid,
+        receiver: c0.account,
+        royalty: {
+          what: 10 ** 5,
+          where: "address"
+        }
+      },
+      domain: { }
+    })
+    console.log(JSON.stringify(gift,null,2))
+    expect(gift.body.cid).to.exist
+    expect(gift.body.id).to.exist
+    expect(gift.body.encoding).to.exist
+    expect(gift.body.receiver).to.exist
+    expect(gift.body.relations.length).to.equal(1)
+    expect(gift.body.relations[0].code).to.equal(11)
+    expect(gift.body.relations[0].addr).to.equal("address")
+    expect(gift.body.relations[0].id).to.equal(10 ** 5)
+
+    expect(gift.body.cid).to.equal(meta_cid)
+    expect(gift.body.receiver).to.equal(c0.account)
   })
 })
