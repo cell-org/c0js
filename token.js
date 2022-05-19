@@ -314,11 +314,6 @@ class Token extends Contract {
           { name: 'chainId', type: 'uint256' },
           { name: 'verifyingContract', type: 'address' },
         ],
-//        Payment: [
-//          { name: "code", type: "uint8" },
-//          { name: "value", type: "uint24" },
-//          { name: "receiver", type: "address" },
-//        ],
         Relation: [
           { name: "code", type: "uint8" },
           { name: "addr", type: "address" },
@@ -332,7 +327,6 @@ class Token extends Contract {
           { name: "value", type: "uint128" },
           { name: "start", type: "uint64" },
           { name: "end", type: "uint64" },
-//          { name: "payments", type: "Payment[]" },
           { name: "sendersHash", type: "bytes32" },
           { name: "receiversHash", type: "bytes32" },
           { name: "puzzleHash", type: "bytes32" },
