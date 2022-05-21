@@ -230,7 +230,17 @@ class Token extends Contract {
     })
     return tx
   }
-  async send(signedTokens, _inputs, options) {
+  async send(signedTokens, _inputs, options, type) {
+    let { domain, signedBodies, inputs, o } = await this.construct(signedTokens, _inputs, options)
+    let tx = await this.methods(domain.verifyingContract).token(signedBodies, inputs).send(o)
+    return tx
+  }
+  async estimate(signedTokens, _inputs, options) {
+    let { domain, signedBodies, inputs, o } = await this.construct(signedTokens, _inputs, options)
+    let e = await this.methods(domain.verifyingContract).token(signedBodies, inputs).estimate(o)
+    return e
+  }
+  async construct(signedTokens, _inputs, options) {
     let signedBodies = []
     let domain = {}
     let value = new this.web3.utils.BN(0)
@@ -298,6 +308,12 @@ class Token extends Contract {
         from: this.account,
         value: value.toString()
       }
+    }
+    return {
+      domain,
+      signedBodies,
+      inputs,
+      o
     }
     let tx = await this.methods(domain.verifyingContract).token(signedBodies, inputs).send(o)
     return tx
