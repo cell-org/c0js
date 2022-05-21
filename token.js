@@ -193,7 +193,7 @@ class Token extends Contract {
       }
     }
     // senders merkle proof
-    if (o.body.senders) {
+    if (o.body.senders && o.body.senders.length > 0) {
       r.body.sendersHash = new Merkle({
         web3: this.web3,
         types: ["address"],
@@ -205,7 +205,7 @@ class Token extends Contract {
       r.body.sendersHash = "0x0000000000000000000000000000000000000000000000000000000000000000"
     }
     // receivers merkle proof
-    if (o.body.receivers) {
+    if (o.body.receivers && o.body.senders.length > 0) {
       r.body.receiversHash = new Merkle({
         web3: this.web3,
         types: ["address"],
