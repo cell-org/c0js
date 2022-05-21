@@ -82,9 +82,7 @@ class Contract {
               if (param && param.gas) o.gas = param.gas
               if (param && param.gasPrice) o.gasPrice = param.gasPrice
               let estimate = await contract.methods[method.name](...args).estimateGas(o)
-              let e = await this.estimate(estimate)
-              e.gas = estimate
-              return e
+              return estimate
             }
           }
         }
