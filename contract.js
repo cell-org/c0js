@@ -1,3 +1,5 @@
+const Errors = require('./errors')
+const extract = require('extract-json-from-string');
 class Contract {
   // must have the attributes:
   //  - abi
@@ -17,6 +19,23 @@ class Contract {
   contract(address) {
     let contract = new this.web3.eth.Contract(this.abi, address)
     return contract
+  }
+  handleError(e) {
+    let error = extract(e.message)
+    if (error.length > 0) {
+      error = error[0]
+      if (error.originalError) {
+        let match = /execution reverted: (.+)$/.exec(error.originalError.message)
+        if (match && match.length > 0) {
+          let code = match[1]
+          let message = Errors["" + code]
+          error.message = message
+        }
+      }
+      throw error
+    } else {
+      throw e
+    }
   }
   methods(address) {
     let contract = new this.web3.eth.Contract(this.abi, address)
@@ -41,8 +60,12 @@ class Contract {
               let estimate = await action.estimateGas(o)
               o.gas = estimate
               const signedTx = await this.wallet.signTransaction(o)
-              let tx = await this.web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-              return tx
+              try {
+                let tx = await this.web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+                return tx
+              } catch (e) {
+                this.handleError(e)
+              }
             },
             call: (param) => {
               return contract.methods[method.name](...args).call(param)
@@ -62,9 +85,13 @@ class Contract {
               if (param && param.value) o.value = param.value
               if (param && param.gas) o.gas = param.gas
               if (param && param.gasPrice) o.gasPrice = param.gasPrice
-              let estimate = await contract.methods[method.name](...args).estimateGas(o)
-              let r = await contract.methods[method.name](...args).send(o)
-              return r
+              try {
+                let estimate = await contract.methods[method.name](...args).estimateGas(o)
+                let r = await contract.methods[method.name](...args).send(o)
+                return r
+              } catch (e) {
+                this.handleError(e)
+              }
             },
             call: async (param) => {
               let o = {
@@ -81,8 +108,12 @@ class Contract {
               if (param && param.value) o.value = param.value
               if (param && param.gas) o.gas = param.gas
               if (param && param.gasPrice) o.gasPrice = param.gasPrice
-              let estimate = await contract.methods[method.name](...args).estimateGas(o)
-              return estimate
+              try {
+                let estimate = await contract.methods[method.name](...args).estimateGas(o)
+                return estimate
+              } catch (e) {
+                this.handleError(e)
+              }
             }
           }
         }
