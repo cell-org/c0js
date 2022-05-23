@@ -30,6 +30,7 @@ class Contract {
           let code = match[1]
           let message = Errors["" + code]
           error.message = message
+          error.code = code
         }
       }
       throw error
