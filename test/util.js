@@ -137,4 +137,22 @@ describe("util", () => {
 
     })
   })
+  describe("util.itoc(id, encoding)", () => {
+    it("correctly transforms id to CID (with encoding 0)", async () => {
+      const id = "66873793171800248244516196649613231247736404523076502481759488587065083018901"
+      const expectedCid = "bafkreiet3e44dbwcebeipbye56gy4m3ipssjbmarrz5sz4mfiowmeo56su"
+      let cid = c0.util.itoc(id)
+      expect(cid).to.equal(expectedCid)
+    })
+  })
+  describe("util.ctoi()", () => {
+    it("correctly transforms cid into (id, encogding) pair", async () => {
+      const cid = "bafkreiet3e44dbwcebeipbye56gy4m3ipssjbmarrz5sz4mfiowmeo56su"
+      let { id, encoding } = c0.util.ctoi(cid)
+      const expectedId = "66873793171800248244516196649613231247736404523076502481759488587065083018901"
+      const expectedEncoding = 0
+      expect(id).to.equal(expectedId)
+      expect(encoding).to.equal(expectedEncoding)
+    })
+  })
 })

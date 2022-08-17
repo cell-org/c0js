@@ -10,6 +10,26 @@ class Util {
   stringify(o) {
     return stringify(o)
   }
+  itoc (id, encoding) {
+    const code = (!encoding ? 85 : 112);
+    const multiHashCode = 18  // sha256
+    const hexId = this.web3.utils.toHex(id)
+    const padded = hexId.slice(2).padStart(64, '0')
+    const d = Uint8Array.from(Buffer.from(padded, 'hex'));
+    const digest = create(multiHashCode, d)
+    const actualCid = CID.create(1, code, digest).toString()
+    return actualCid
+  }
+  ctoi (cid) {
+    // returns id and raw  
+    const digest = CID.parse(cid).multihash.digest
+    const bytes = base32.decode(cid)
+    const inspected = CID.inspectBytes(base32.decode(cid)) // inspected.codec: 112 (0x70)
+    const codec = inspected.codec
+    const id = new this.web3.utils.BN(digest).toString();
+    const encoding = (codec === 85 ? 0 : 1)  // 0x55 is raw (0), 0x70 is dag-pb (1)
+    return { id, encoding }
+  }
   async cid(o) {
     let type = o.constructor.name;
     let r;
