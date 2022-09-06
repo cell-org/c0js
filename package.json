@@ -1,6 +1,6 @@
 {
   "name": "c0js",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "dependencies": {
     "@metamask/eth-sig-util": "^4.0.0",
     "extract-json-from-string": "^1.0.1",
-    "ipfsh": "^0.0.7",
+    "ipfsh": "^0.0.8",
     "json-stringify-deterministic": "^1.0.5",
     "merkletreejs": "^0.2.31"
   },

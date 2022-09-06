@@ -122,5 +122,81 @@ class Contract {
     }
     return api
   }
+  async construct(signedTokens, _inputs, options) {
+    let signedBodies = []
+    let domain = {}
+    let value = new this.web3.utils.BN(0)
+    let inputs = []
+    for(let i=0; i<signedTokens.length; i++) {
+      inputs[i] = {}
+      if (_inputs && _inputs[i] && _inputs[i].receiver) {
+        inputs[i].receiver = _inputs[i].receiver
+      } else {
+        inputs[i].receiver = this.account
+      }
+      for(let key in signedTokens[i].domain) {
+        let val = signedTokens[i].domain[key]
+        if (domain[key] && domain[key] !== val) {
+          // different domain value
+          throw new Error("all domains must be the same")
+          return
+        }
+        domain[key] = val
+      }
+      if (signedTokens[i].body.sendersHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        inputs[i].sendersProof = new Merkle({
+          web3: this.web3,
+          types: ["address"],
+          values: signedTokens[i].body.senders.map(m => [m])
+        }).proof([this.account])
+      } else {
+        inputs[i].sendersProof = []
+      }
+      if (signedTokens[i].body.receiversHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        inputs[i].receiversProof = new Merkle({
+          web3: this.web3,
+          types: ["address"],
+          values: signedTokens[i].body.receivers.map(m => [m])
+        }).proof([inputs[i].receiver])
+      } else {
+        inputs[i].receiversProof = []
+      }
+      if (signedTokens[i].body.puzzleHash !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        if (!_inputs || !_inputs[i] || !_inputs[i].puzzle) throw new Error("missing auth: 'puzzle'")
+        inputs[i].puzzle = this.web3.utils.asciiToHex(_inputs[i].puzzle)
+      } else {
+        inputs[i].puzzle = "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+
+
+      // remove the "senders" array and the "cid" attribute from the token
+      let body = Object.assign({}, signedTokens[i].body)
+      delete body.senders
+      delete body.receivers
+      delete body.cid
+
+      signedBodies.push(body)
+      value = value.add(new this.web3.utils.BN(signedTokens[i].body.value))
+    }
+    let o;
+    if (options) {
+      o = Object.assign({}, options)
+      if (!value.isZero() && typeof o.value === "undefined") {
+        o.value = value.toString()
+      }
+      o.from = this.account
+    } else {
+      o = {
+        from: this.account,
+        value: value.toString()
+      }
+    }
+    return {
+      domain,
+      signedBodies,
+      inputs,
+      o
+    }
+  }
 }
 module.exports = Contract

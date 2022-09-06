@@ -315,8 +315,6 @@ class Token extends Contract {
       inputs,
       o
     }
-    let tx = await this.methods(domain.verifyingContract).token(signedBodies, inputs).send(o)
-    return tx
   }
   typed(token) {
     const data = {
